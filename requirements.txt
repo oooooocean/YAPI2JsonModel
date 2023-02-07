@@ -1,0 +1,9 @@
+altgraph
+certifi==2022.12.7
+charset-normalizer==3.0.1
+future
+idna==3.4
+macholib
+requests==2.28.2
+six
+urllib3==1.26.14
