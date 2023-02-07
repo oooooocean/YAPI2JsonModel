@@ -44,8 +44,9 @@ def __parse(attrs: dict, collector: list[ParseObjectResult], class_name='JsonMod
         value_type = SwiftType[value['type']]
         if value_type is SwiftType.array:
             if 'properties' in value['items']:  # 对象数组
-                type_name = f'[{_capitalize(name)}]'
-                __parse(value['items']['properties'], collector, class_name=type_name)
+                class_name = _capitalize(name)
+                type_name = f'[{class_name}]'
+                __parse(value['items']['properties'], collector, class_name=class_name)
             else:  # 常规类型数组
                 type_name = f'[{SwiftType[value["items"]["type"]].value}]'
         elif value_type is SwiftType.object:  # 嵌套对象类型
