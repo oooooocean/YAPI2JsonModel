@@ -13,7 +13,7 @@ pip3 install -r requirements.txt
 
 ### 脚本使用
 
-以http://xxx/project/88/interface/api/5496接口为例:
+以`/project/xxx/interface/api/5496`接口为例:
 ```shell
 $ python3 main.py -h           
 🚀START
