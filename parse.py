@@ -1,39 +1,32 @@
 from json import loads
-from maps import SwiftType
+from maps import SwiftType, find_value, ArrayDataPath
 from collections import namedtuple
+from exceptions import ParseError
 
 ParseAttrResult = namedtuple('ParseAttrResult', ['name', 'type', 'description', 'enumDescription'])
 ParseObjectResult = namedtuple('ParseObjectResult', ['name', 'description', 'attrs'])
 
 
-class ParseError(Exception):
-    def __init__(self, description):
-        self.description = description
-
-    def __str__(self):
-        return self.description
-
-
 def parse(content: dict) -> list[str]:
-    data = content.get('res_body', None)
-    if not data:
-        raise ParseError('res_body 不存在')
     try:
-        json = loads(data)
-    except Exception:
-        raise ParseError(f'json解析失败, data: {data}')
-    try:
-        properties: dict = json['properties']['data']['properties']
+        properties: dict = content['data']['properties']
     except KeyError:
         raise ParseError(f'json解析失败, 过于简单不需要解析')
     if not len(properties):
         raise ParseError(f'json解析失败, 过于简单不需要解析')
-    is_array = 'total' in properties and 'data' in properties
-    if is_array:
-        properties = properties['data']['items']['properties']
+    if array_item := _find_array_item(properties):
+        properties = array_item
     results = []
     __parse(properties, results)
     return [_format_for_swift(result) for result in results][::-1]
+
+
+def _find_array_item(content: dict):
+    if 'total' not in content:
+        return None
+    if properties := find_value(content, ArrayDataPath)['items']['properties']:
+        return properties
+    return None
 
 
 def __parse(attrs: dict, collector: list[ParseObjectResult], class_name='JsonModel', description=None):
