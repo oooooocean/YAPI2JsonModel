@@ -1,5 +1,4 @@
-from json import loads
-from maps import SwiftType, find_value, ArrayDataPath
+from maps import SwiftType, find_value, ArrayDataPath, KotlinType, Platform
 from collections import namedtuple
 from exceptions import ParseError
 
@@ -7,21 +6,28 @@ ParseAttrResult = namedtuple('ParseAttrResult', ['name', 'type', 'description', 
 ParseObjectResult = namedtuple('ParseObjectResult', ['name', 'description', 'attrs'])
 
 
-def parse(content: dict) -> list[str]:
+def parse(content: dict, platform: Platform) -> list[str]:
+    """
+    解析为Json Model
+    """
     try:
         properties: dict = content['data']['properties']
     except KeyError:
         raise ParseError(f'json解析失败, 过于简单不需要解析')
-    if not len(properties):
-        raise ParseError(f'json解析失败, 过于简单不需要解析')
-    if array_item := _find_array_item(properties):
-        properties = array_item
-    results = []
-    __parse(properties, results)
-    return [_format_for_swift(result) for result in results][::-1]
+    else:
+        if not len(properties):
+            raise ParseError(f'json解析失败, 过于简单不需要解析')
+        if array_item := _find_array_item(properties):
+            properties = array_item
+        results = []
+        __parse(properties, results)
+        return [platform.format(result) for result in results][::-1]
 
 
 def _find_array_item(content: dict):
+    """
+    检查是否是数组类型
+    """
     if 'total' not in content:
         return None
     if properties := find_value(content, ArrayDataPath)['items']['properties']:
@@ -29,26 +35,34 @@ def _find_array_item(content: dict):
     return None
 
 
-def __parse(attrs: dict, collector: list[ParseObjectResult], class_name='JsonModel', description=None):
+def __parse(attrs: dict, platform: Platform, collector: list[ParseObjectResult],
+            class_name='JsonModel', description=None):
+    """
+    将字典解析为平台类型的数据
+    :param attrs: 待解析的字典
+    :param collector: 收集解析结果的数组
+    :param class_name: 解析后类名
+    :param description: 注释
+    :return: None
+    """
     results = []
     for key, value in attrs.items():
         name = key
-        # 类型
-        value_type = SwiftType[value['type']]
-        if value_type is SwiftType.array:
+        value_type = SwiftType[value['type']] if platform is Platform.Swift else KotlinType[value['type']]  # Y-Api中的类型映射为平台类型
+        if value_type.is_array():
             if 'properties' in value['items']:  # 对象数组
                 class_name = _capitalize(name)
-                type_name = f'[{class_name}]'
+                type_name = platform.format_array(class_name)
                 __parse(value['items']['properties'], collector, class_name=class_name)
             else:  # 常规类型数组
-                type_name = f'[{SwiftType[value["items"]["type"]].value}]'
-        elif value_type is SwiftType.object:  # 嵌套对象类型
+                item_type = SwiftType[value["items"]["type"]] if platform is Platform.Swift else KotlinType[value["items"]["type"]]
+                type_name = platform.format_array(item_type.value())
+        elif value_type.is_object():  # 嵌套对象类型
             type_name = _capitalize(name)
             __parse(value['properties'], collector, class_name=type_name)
         else:
             type_name = value_type.value
-        # 描述
-        if description := value.get('description', None):
+        if description := value.get('description', None): # 描述
             description = description.replace('\n', '')
         if enum_description := value.get('enumDesc', None):
             enum_description = enum_description.replace('\n', '')
@@ -56,25 +70,8 @@ def __parse(attrs: dict, collector: list[ParseObjectResult], class_name='JsonMod
     collector.append(ParseObjectResult(class_name, description, results))
 
 
-def _format_annotation_for_swift(description, enum_description) -> str:
-    result = ''
-    if description:
-        result += f'\t/// {description}\n'
-    if enum_description:
-        result += f'\t/// {enum_description}\n'
-    return result
-
-
-def _format_for_swift(value: ParseObjectResult, use_class=False) -> str:
-    classname = f'{"class" if use_class else "struct"} {value.name}: Decodable'
-    attrs: list[ParseAttrResult] = value.attrs
-    content = '\n'.join(
-        [f'{_format_annotation_for_swift(item.description, item.enumDescription)}\tlet {item.name}: {item.type}'
-         for item in attrs]
-    )
-
-    return '%s {\n%s\n}' % (classname, content)
-
-
 def _capitalize(value: str):
+    """
+    使字符串的第一个字母大写
+    """
     return ''.join([value[:1].upper(), (value[1:])])

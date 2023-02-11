@@ -13,9 +13,6 @@ if __name__ == '__main__':
     print('🚀START')
     args = parser.parse_args()
     ids: list = args.ids
-    if not ids or len(ids) == 0:
-        exit()
-
     results = []
     for api_id in args.ids:
         try:

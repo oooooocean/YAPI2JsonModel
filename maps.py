@@ -11,12 +11,33 @@ class SwiftType(Enum):
     boolean = 'Bool'
     number = 'Double'
 
+    def is_array(self) -> boolean:
+        return self is SwiftType.array
+
+    def is_object(self) -> boolean:
+        return self is SwiftType.object
+
+
+class KotlinType(Enum):
+    integer = 'Long'
+    string = 'String'
+    object = 'Any'
+    array = 'Array'
+    boolean = 'Boolean'
+    number = 'Double'
+
+    def is_array(self) -> boolean:
+        return self == KotlinType.array
+
+    def is_object(self) -> boolean:
+        return self is KotlinType.object
+
 
 JsonBagStruct = namedtuple('JsonBagStruct', ('code', 'msg', 'data'))
 
-JsonPath = JsonBagStruct(code=('code', ), msg=('msg', ), data=('data', ))
+JsonPath = JsonBagStruct(code=('code',), msg=('msg',), data=('data',))
 
-ArrayDataPath = ('data', )
+ArrayDataPath = ('data',)
 
 
 def find_value(content: dict, keys: Iterable):
