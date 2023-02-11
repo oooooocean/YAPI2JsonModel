@@ -1,6 +1,7 @@
-from maps import SwiftType, find_value, ArrayDataPath, KotlinType, Platform
+from maps import SwiftType, find_value, ArrayDataPath, KotlinType
 from collections import namedtuple
 from exceptions import ParseError
+from platform import Platform
 
 ParseAttrResult = namedtuple('ParseAttrResult', ['name', 'type', 'description', 'enumDescription'])
 ParseObjectResult = namedtuple('ParseObjectResult', ['name', 'description', 'attrs'])
