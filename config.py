@@ -1,5 +1,5 @@
 HOST = 'http://192.168.32.30:3000'
 PATH = 'api/interface/get'
-TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjY3LCJpYXQiOjE2NzU2NzU1NzMsImV4cCI6MTY3NjI4MDM3M30.' \
-        'Orun7_e-Ig70OqlKhitYxbWpkdGwAktm_bUpo_K47d0'
+TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' \
+        'eyJ1aWQiOjY3LCJpYXQiOjE2Nzg2NzkwNzcsImV4cCI6MTY3OTI4Mzg3N30.er3CK5LZP_m0ZFR1OAbmqJZP518MHGAiwooVe7Xx9cc'
 UID = '67'

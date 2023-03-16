@@ -2,7 +2,7 @@
 `1.0.0` `自动构建.swift` `支持嵌套类型` `支持批量操作`
 
 ## 说明
-- 开发环境: `Python 3.9.6` `macOS Ventura`
+- 开发环境: `Python 3.11.3` `macOS Ventura`
 ### 安装依赖
 ```shell
 pip3 install -r requirements.txt
@@ -38,12 +38,10 @@ $ python3 main.py 5496 --file
 - [x] 支持 Swift
 - [x] 支持输入结果到文件中
 - [x] 支持嵌套类型
-- [ ] 优化异常捕获
-- [ ] 支持多线程
+- [x] 优化异常捕获
 - [ ] 配置信息本地缓存, 支持自动登录, 不需要手动配置
-- [ ] 支持 Kotlin
-- [ ] 支持 Js
-- [ ] 多线程转协程
+- [x] 支持 Kotlin
+- [x] 支持协程
 
 ## 联系我
 WX: chenqiangsf

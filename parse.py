@@ -1,18 +1,19 @@
 from maps import SwiftType, find_value, ArrayDataPath, KotlinType
 from collections import namedtuple
 from exceptions import ParseError
-from platform import Platform
+from platform_ import Platform
+from collections.abc import Coroutine
 
 ParseAttrResult = namedtuple('ParseAttrResult', ['name', 'type', 'description', 'enumDescription'])
 ParseObjectResult = namedtuple('ParseObjectResult', ['name', 'description', 'attrs'])
 
 
-def parse(content: dict, platform: Platform) -> list[str]:
+async def parse(content: Coroutine, platform: Platform) -> list[str]:
     """
     解析为Json Model
     """
     try:
-        properties: dict = content['data']['properties']
+        properties: dict = (await content)['data']['properties']
     except KeyError:
         raise ParseError(f'json解析失败, 过于简单不需要解析')
     else:
@@ -59,7 +60,7 @@ def __parse(attrs: dict, platform: Platform, collector: list[ParseObjectResult],
             else:  # 常规类型数组
                 item_type = SwiftType[value["items"]["type"]] if platform is Platform.Swift else KotlinType[
                     value["items"]["type"]]
-                type_name = platform.format_array(item_type.value())
+                type_name = platform.format_array(item_type.value)
         elif value_type.is_object():  # 嵌套对象类型
             type_name = _capitalize(name)
             __parse(value['properties'], platform, collector, class_name=type_name)
