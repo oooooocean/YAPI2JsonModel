@@ -1,26 +1,33 @@
 import argparse
 from reptile import fetch
 from parse import parse, ParseError
-from output import output_to_console, output_to_file, output_to_file_kotlin
+from output import output_to_console, output_to_file, output_to_file_dart, output_to_file_kotlin
 from platform_ import Platform
 import asyncio
 from itertools import chain
 
 parser = argparse.ArgumentParser(description='Y-API 2 JSON BEAN🚀🚀🚀')
 parser.add_argument('ids', help='需要转换的Y-api的接口id, 可多传', nargs='+')
-parser.add_argument('-i', '--ios', help='生成iOS平台 Swift Decodable Model', action='store_true', default=True)
+parser.add_argument('-i', '--ios', help='生成iOS平台 Swift Decodable Model', action='store_true')
 parser.add_argument('-a', '--android', help='生成Android平台 Kotlin Json Bean', action='store_true')
+parser.add_argument('-d', '--dart', help='生成Flutter平台 JsonSerializable', action='store_true')
 parser.add_argument('-f', '--file', help='将结果保存到文件中', action='store_true')
 
 
 async def main():
     args = parser.parse_args()
     tasks = []
+    if args.ios:
+        platform = Platform.Swift
+    elif args.android:
+        platform = Platform.Kotlin
+    else:
+        platform = Platform.Flutter
     async with asyncio.TaskGroup() as group:
         for api_id in args.ids:
             try:
                 task = group.create_task(
-                    parse(fetch(api_id), platform=Platform.Swift if args.ios else Platform.Kotlin)
+                    parse(fetch(api_id), platform=platform)
                 )
             except ParseError as e:
                 print(f'😈{e}')
@@ -32,8 +39,10 @@ async def main():
     if args.file:
         if args.ios:
             output_to_file(results)
-        if args.android:
+        elif args.android:
             output_to_file_kotlin(results)
+        else:
+            output_to_file_dart(results)
 
     else:
         output_to_console(results)

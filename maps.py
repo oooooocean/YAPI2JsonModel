@@ -33,9 +33,24 @@ class KotlinType(Enum):
         return self is KotlinType.object
 
 
+class DartType(Enum):
+    integer = 'int'
+    string = 'String'
+    object = 'dynamic'
+    array = 'List'
+    boolean = 'bool'
+    number = 'double'
+
+    def is_array(self) -> boolean:
+        return self is DartType.array
+
+    def is_object(self) -> boolean:
+        return self is DartType.object
+
+
 JsonBagStruct = namedtuple('JsonBagStruct', ('code', 'msg', 'data'))
 
-JsonPath = JsonBagStruct(code=('code',), msg=('msg',), data=('data',))
+JsonPath = JsonBagStruct(code=('code', 'success', 'errcode'), msg=('msg', 'errmsg'), data=('data',))
 
 ArrayDataPath = ('data',)
 

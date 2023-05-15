@@ -28,6 +28,7 @@ optional arguments:
   -h, --help     show this help message and exit
   -i, --ios      生成iOS平台 Swift Decodable Model
   -a, --android  生成Android平台 Kotlin Json Bean
+  -d, --dart     生成Flutter平台 JsonSerializable
   --file         将结果保存到文件中
 
 
@@ -42,6 +43,7 @@ $ python3 main.py 5496 --file
 - [ ] 配置信息本地缓存, 支持自动登录, 不需要手动配置
 - [x] 支持 Kotlin
 - [x] 支持协程
+- [x] 支持dart
 
 ## 联系我
 WX: chenqiangsf

@@ -1,4 +1,4 @@
-from maps import SwiftType, find_value, ArrayDataPath, KotlinType
+from maps import SwiftType, find_value, ArrayDataPath, KotlinType, DartType
 from collections import namedtuple
 from exceptions import ParseError
 from platform_ import Platform
@@ -13,7 +13,7 @@ async def parse(content: Coroutine, platform: Platform) -> list[str]:
     解析为Json Model
     """
     try:
-        properties: dict = (await content)['data']['properties']
+        properties: dict = (await content)['data']
     except KeyError:
         raise ParseError(f'json解析失败, 过于简单不需要解析')
     else:
@@ -21,6 +21,8 @@ async def parse(content: Coroutine, platform: Platform) -> list[str]:
             raise ParseError(f'json解析失败, 过于简单不需要解析')
         if array_item := _find_array_item(properties):
             properties = array_item
+        else:
+            properties = properties['properties']
         results = []
         __parse(properties, platform, results)
         return [platform.format(result) for result in results][::-1]
@@ -30,9 +32,9 @@ def _find_array_item(content: dict):
     """
     检查是否是数组类型
     """
-    if 'total' not in content:
+    if 'items' not in content:
         return None
-    if properties := find_value(content, ArrayDataPath)['items']['properties']:
+    if properties := content['items']['properties']:
         return properties
     return None
 
@@ -50,16 +52,27 @@ def __parse(attrs: dict, platform: Platform, collector: list[ParseObjectResult],
     results = []
     for key, value in attrs.items():
         name = key
-        value_type = SwiftType[value['type']] if platform is Platform.Swift else KotlinType[
-            value['type']]  # Y-Api中的类型映射为平台类型
+        # Y-Api中的类型映射为平台类型
+        match platform:
+            case Platform.Swift:
+                value_type = SwiftType[value['type']]
+            case Platform.Kotlin:
+                value_type = KotlinType[value['type']]
+            case Platform.Flutter:
+                value_type = DartType[value['type']]
         if value_type.is_array():
             if 'properties' in value['items']:  # 对象数组
                 class_name = _capitalize(name)
                 type_name = platform.format_array(class_name)
                 __parse(value['items']['properties'], platform, collector, class_name=class_name)
             else:  # 常规类型数组
-                item_type = SwiftType[value["items"]["type"]] if platform is Platform.Swift else KotlinType[
-                    value["items"]["type"]]
+                match platform:
+                    case Platform.Swift:
+                        item_type = SwiftType[value["items"]["type"]]
+                    case Platform.Kotlin:
+                        item_type = KotlinType[value["items"]["type"]]
+                    case Platform.Flutter:
+                        item_type = DartType[value["items"]["type"]]
                 type_name = platform.format_array(item_type.value)
         elif value_type.is_object():  # 嵌套对象类型
             type_name = _capitalize(name)
