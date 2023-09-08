@@ -62,8 +62,8 @@ def _format_for_flutter(value) -> str:
             f'{_format_annotation_for_swift_or_flutter(item.description, item.enumDescription)}\tfinal {item.type} {item.name};'
             for item in attrs]
     )
-    initializer = f'\t{value.name}({", ".join([f"this.{item.name}" for item in attrs])})'
-    factory = f'\tfactory {value.name}.fromJson(Map<String, dynamic> json) => _${value.name}.FromJson(json);\n\n\t' \
+    initializer = f'\t{value.name}({", ".join([f"this.{item.name}" for item in attrs])});'
+    factory = f'\tfactory {value.name}.fromJson(Map<String, dynamic> json) => _${value.name}FromJson(json);\n\n\t' \
               f'Map<String, dynamic> toJson() => _${value.name}ToJson(this);'
 
     return '%s\n\n%s {\n%s\n\n%s\n\n%s\n}' % (import_string, classname, content, initializer, factory)
