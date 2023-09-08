@@ -53,6 +53,7 @@ def __parse(attrs: dict, platform: Platform, collector: list[ParseObjectResult],
     results = []
     for key, value in attrs.items():
         name = key
+        print(value)
         # Y-Api中的类型映射为平台类型
         match platform:
             case Platform.Swift:
@@ -80,8 +81,14 @@ def __parse(attrs: dict, platform: Platform, collector: list[ParseObjectResult],
             __parse(value['properties'], platform, collector, class_name=type_name)
         else:
             type_name = value_type.value
+
         if description := value.get('title', None):  # 描述
             description = description.replace('\n', '')
+
+        if description is None:
+            if description := value.get('description', None):  # 描述
+                description = description.replace('\n', '')
+
         if enum_description := value.get('enumDesc', None):
             enum_description = enum_description.replace('\n', '')
         results.append(ParseAttrResult(name, type_name, description, enum_description))
