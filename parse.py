@@ -53,7 +53,6 @@ def __parse(attrs: dict, platform: Platform, collector: list[ParseObjectResult],
     results = []
     for key, value in attrs.items():
         name = key
-        print(value)
         # Y-Api中的类型映射为平台类型
         match platform:
             case Platform.Swift:
