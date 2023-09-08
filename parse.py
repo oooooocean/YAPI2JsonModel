@@ -49,6 +49,7 @@ def __parse(attrs: dict, platform: Platform, collector: list[ParseObjectResult],
     :param description: 注释
     :return: None
     """
+
     results = []
     for key, value in attrs.items():
         name = key
@@ -79,7 +80,7 @@ def __parse(attrs: dict, platform: Platform, collector: list[ParseObjectResult],
             __parse(value['properties'], platform, collector, class_name=type_name)
         else:
             type_name = value_type.value
-        if description := value.get('description', None):  # 描述
+        if description := value.get('title', None):  # 描述
             description = description.replace('\n', '')
         if enum_description := value.get('enumDesc', None):
             enum_description = enum_description.replace('\n', '')
